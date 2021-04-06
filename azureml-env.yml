@@ -1,0 +1,47 @@
+# The python packages necessary to run ComputerVisionMastery
+#
+# Install : conda env create -f environment.yml
+# Update  : conda env update -f environment.yml --prune
+# Remove  : conda env remove -n azureml
+
+name: azureml
+dependencies:
+  # The python interpreter version.
+  # Currently Azure ML only supports 3.5.2 and later.
+- python>=3.7 # the latest python release running on dev machine
+
+- pip:
+    # Required packages for AzureML execution, history, and data preparation.
+  - azureml-defaults
+  - azureml-core
+  - azureml-sdk    
+  - numpy
+  - requests
+  
+  # MISC for VSCOde
+  - pylint
+  - autopep8
+  - pyyaml  # for detectron2
+  - yacs
+
+  # Jupyter Notebook Dependencies
+  - jupyter # great tool for any python project.
+  - nb_conda_kernels
+  - ipykernel
+  - jupyterlab
+  - ipywidgets
+  - tqdm # popular progress bar for jupyter
+
+
+  ### the `nb_conda_kernels` and `ipykernel` packages are installed so that we
+  ### can use Jupyter Notebooks with this environment as a kernel
+  ### to install the azureml jupyter kneral for all conda environment 
+  ### conda activate azureml
+  ### python -m ipykernel install --user --name azureml
+  ###
+  ### Azure Widgets install
+  ### pip install --upgrade azureml-sdk[notebooks,contrib] 
+  ### conda install ipywidgets
+  ### jupyter nbextension install --py --user azureml.widgets
+  ### jupyter nbextension enable azureml.widgets --user --py
+  ### need to restart jupyter after this
