@@ -1,13 +1,15 @@
 # Azure ML
 
-# AML Demo Development Status
+# AML Demo Development Status and Content
 
-Azure Machine Learning Service Demo with ZeroWaste
+Azure Machine Learning Service Demo
 
 * [ ] [setting up environment](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-environment)
 * [ ] connect data set
 * [ ] set up environment
 * [ ] training 
+  * [x] Detectron2
+  * [x] Yolact
 * [ ] model evaluaiton
 * [ ] model registration 
 * [ ] model deployment and operationation 
