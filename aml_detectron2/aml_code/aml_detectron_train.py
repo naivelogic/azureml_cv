@@ -99,15 +99,13 @@ if __name__ == "__main__":
     print("All Aguments: \n", args)
 
     DATA_FOLDER = args["data_folder"]
-    #IMG_PATHS = args["img_folder"]
-    #MASKS_PATHS = args["masks_folder"]
     TRAIN_CONFIG = args["config_file"]
     OUTPUT_PATHS = args["output_folder"]
 
     TRAIN_IMG_DIR = args["train_img_dir"]
     TRAIN_COCO_JSON = args["train_coco_json"]
-    VAL_COCO_JSON = args["val_img_dir"]
-    VAL_IMG_DIR = args["val_coco_json"]
+    VAL_IMG_DIR= args["val_img_dir"]
+    VAL_COCO_JSON = args["val_coco_json"]
 
 
     from detectron2.data.datasets import register_coco_instances
@@ -117,7 +115,7 @@ if __name__ == "__main__":
 
     VAL_PATH = os.path.join(DATA_FOLDER, VAL_COCO_JSON)
     VAL_IMG_PATH= os.path.join(DATA_FOLDER, VAL_IMG_DIR)
-    register_coco_instances(f"custom_dataset_val", {},TRAIN_PATH , VAL_IMG_PATH) 
+    register_coco_instances(f"custom_dataset_val", {},VAL_PATH , VAL_IMG_PATH) 
 
     from detectron2.engine import DefaultTrainer
     from detectron2.config import get_cfg
