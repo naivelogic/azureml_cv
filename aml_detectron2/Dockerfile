@@ -1,6 +1,4 @@
-# See: https://hub.docker.com/r/nvidia/cuda/tags?page=1&ordering=last_updated
-FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04
-
+FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
@@ -15,14 +13,14 @@ USER appuser
 WORKDIR /home/appuser
 
 ENV PATH="/home/appuser/.local/bin:${PATH}"
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
+RUN wget https://bootstrap.pypa.io/pip/3.6/get-pip.py && \
 	python3 get-pip.py --user && \
 	rm get-pip.py
 
 # install dependencies
 # See https://pytorch.org/ for other options if you use a different version of CUDA
-RUN pip install --user tensorboard cmake cython   # cmake from apt-get is too old
-RUN pip install --user torch==1.7.1+cu110 torchvision==0.8.2+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install --user tensorboard cmake cython  # cmake from apt-get is too old
+RUN pip install --user torch==1.10 torchvision==0.11.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
 
 RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
 # install detectron2
@@ -37,6 +35,13 @@ ENV TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST}"
 RUN pip install --user -e detectron2_repo
 
 RUN pip install azureml-defaults
+
+#updates for mayatron 
+RUN pip install -U albumentations
+RUN pip install scikit-image timm omegaconf
+
+# 1/30/22 to fix setuptools error - https://stackoverflow.com/questions/70520120/attributeerror-module-setuptools-distutils-has-no-attribute-version
+RUN python3 -m pip install setuptools==59.5.0
 
 # Set a fixed model cache directory.
 ENV FVCORE_CACHE="/tmp"

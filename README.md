@@ -1,68 +1,73 @@
 # Azure ML
 
-# AML Demo Development Status and Content
+## Overview
+This repository utilizes Azure ML to train `detectron2` and `yolact` based models. Refer to the below diagram for an architecture overview of the implemented method. 
+
+![](docs/media/aml_architecture.png)
+
+### AML Demo Development Status and Content
 
 Azure Machine Learning Service Demo
 
-* [ ] [setting up environment](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-environment)
-* [ ] connect data set
-* [ ] set up environment
-* [ ] training 
+* [x] [setting up environment](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-environment)
+* [x] connect data set
+* [x] set up environment
+* [x] training 
   * [x] Detectron2
-  * [x] Yolact
+  * [ ] Yolact _(need to finish)_
+  * [ ] [Yolov5](https://github.com/ultralytics/yolov5)
+  * [ ] [Pytorch.segmentation_models](https://github.com/qubvel/segmentation_models.pytorch)
 * [ ] model evaluaiton
 * [ ] model registration 
 * [ ] model deployment and operationation 
 
 
-### Installing AML
+## Quick Start
 
-```
-conda create -n azureml -y Python=3.7
-source activate azureml
-pip install --upgrade azureml-sdk[notebooks,contrib] 
-conda install ipywidgets
-jupyter nbextension install --py --user azureml.widgets
-jupyter nbextension enable azureml.widgets --user --py
+Quick start for utilized detectron2 and yolact for AzureML training. Please follow this [Azure ML Doc](https://docs.microsoft.com/en-us/azure/machine-learning/overview-what-is-machine-learning-studio) for setting up initial AzureML Environment. 
 
-## if using Jupyter Notebooks create custom jupyter kernel for WaterWaste
-python -m ipykernel install --user --name=azureml
-pip install yacs
-```
+1. Finalize training dataset and coco annotations 
+2. update model training configs and dataset info in either the `aml_detectron2` or `aml_yolact` `aml_code` folder
+3. update required training config in the `experiment_cfg.py` file
+4. run `python aml_new_experiment.py`
 
 
+## Installation 
+
+1. Clone this repository ([git installation required](https://git-scm.com/))
+   ```sh
+   cd $HOME # or another directory for this project/repo
+   git clone https://github.com/naivelogic/azureml_cv.git
+   cd azureml_cv
+   ```
+
+1. Tools that I am using
+   - [Visual Studio Code](https://code.visualstudio.com/Download)
+
+2. Install environment with [Anaconda](https://www.continuum.io/downloads): 
+   
+   ```sh
+   conda env create -f azureml-env.yml 
+   conda activate azureml
+
+   ## if using Jupyter Notebooks create custom jupyter kernel for AzureML
+   python -m ipykernel install --user --name=azureml
+
+   jupyter nbextension install --py --user azureml.widgets
+   jupyter nbextension enable azureml.widgets --user --py
+   ```
+
+3. Login to Azure on the command line
+   > seems like i need to run `az login --use-device-code` to initialize each session for authentication to the AML workspace (i have multiple AML across different subscriptions and tenants)
+   ```sh
+   # azure cli linux 
+   ## install az function tools
+   # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+   # now log in 
+   az login --use-device-code
+   ```
 
 
-## Running with Docker
 
-### Quick Start
-
-- loging to registry `docker login -u [USERNAME] -p [PASWORD] [USERNAME].azurecr.io`
-- pull docker `docker pull [USERNAME].azurecr.io/yolact:1`
-- run `docker run --gpus=all --shm-size 8G -v /home/$USER/mnt/project_zero/:/mnt/ -it yolacter`
-
-
-__Key Requirement:__ [NVIDIA Driver Installation](https://github.com/NVIDIA/nvidia-docker) 
-
-#### Usage
-
-__Train__
-
-TODO:
-
-__Evaluate__
-
-TODO:
-
-
-__Prediction/Inference__
-
-TODO:
-
-## Build Container
-
-```
-docker login 
-docker build . -f Docker/yolact.Dockerfile -t [USERNAME].azurecr.io/yolact:1
-docker push [USERNAME].azurecr.io/yolact:1
-```

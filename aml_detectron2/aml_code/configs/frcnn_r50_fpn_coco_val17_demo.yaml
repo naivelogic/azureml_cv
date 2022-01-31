@@ -1,0 +1,26 @@
+_BASE_: "./Base-RCNN-FPN.yaml" #"model_cfg/Base-RCNN-FPN.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  MASK_ON: False
+  RESNETS:
+    DEPTH: 50
+  BACKBONE:
+    FREEZE_AT: 2 # freeze the first X stages of backbone
+  ROI_HEADS:
+    BATCH_SIZE_PER_IMAGE: 512 #smaller numbers are faster
+    NUM_CLASSES: 80 # only has one class
+SOLVER:
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.005
+  CHECKPOINT_PERIOD: 500 # Save a checkpoint after every this number of iterations
+  STEPS: (240, 700, 1500, 1760, 1860 )
+  MAX_ITER: 2000
+DATASETS:
+  TRAIN: ("custom_dataset_train",) #("train_instances_val2017.json",)
+  TEST: ("custom_dataset_val",) #("val_instances_val2017.json",)
+TEST:
+  EVAL_PERIOD: 500 #5 #how often to eval val
+  #SCORE_THRESH: 0.7
+DATALOADER:
+  NUM_WORKERS: 6 #1
+VIS_PERIOD: 500

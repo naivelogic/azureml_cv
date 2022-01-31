@@ -9,6 +9,9 @@ import detectron2.utils.comm as comm
 from detectron2.data import MetadataCatalog, build_detection_train_loader
 from detectron2.data.dataset_mapper import DatasetMapper
 from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch
+from detectron2.modeling import GeneralizedRCNNWithTTA
+from detectron2.utils.events import EventStorage
+
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -40,6 +43,8 @@ print(run)
 
 
 def parse_args(in_args=None):
+    # https://github.com/facebookresearch/detectron2/blob/master/tools/visualize_data.py
+
     parser = argparse.ArgumentParser(description="TBD")
     parser.add_argument("--source",
         choices=["annotation", "dataloader"],
@@ -71,10 +76,14 @@ if __name__ == "__main__":
     # construct the argument parser and parse the arguments
     ap = argparse.ArgumentParser()
     ap.add_argument('--data-folder', type=str, dest='data_folder', help='data folder mounting point')
-    ap.add_argument('--img-folder', type=str, dest='img_folder', help='data folder mounting point')
-    ap.add_argument('--masks-folder', type=str, dest='masks_folder', help='data folder mounting point')
     ap.add_argument('--output-folder', type=str, dest='output_folder', help='trained model folder mounting point')
     ap.add_argument('--config-file', type=str, dest='config_file', help='training configuraiton ad parameters')
+    ## new
+    ap.add_argument('--train_img_dir', type=str, dest='train_img_dir', help='training image data folder mounting point')
+    ap.add_argument('--train_coco_json', type=str, dest='train_coco_json', help='training data annotation json file')
+    ap.add_argument('--val_img_dir', type=str, dest='val_img_dir', help='training image data folder mounting point')
+    ap.add_argument('--val_coco_json', type=str, dest='val_coco_json', help='training data annotation json file')
+
     ap.add_argument('--num-gpus', type=int, default=1, dest='num_gpus', help='number of gpus *per machine')
     ap.add_argument("--num-machines", type=int, default=1,dest='num_machines', help="total number of machines")
     ap.add_argument("--opts",help="Modify config options using the command-line 'KEY VALUE' pairs",dest='opts',default=[],nargs=argparse.REMAINDER,)
@@ -90,66 +99,59 @@ if __name__ == "__main__":
     print("All Aguments: \n", args)
 
     DATA_FOLDER = args["data_folder"]
-    IMG_PATHS = args["img_folder"]
-    MASKS_PATHS = args["masks_folder"]
+    #IMG_PATHS = args["img_folder"]
+    #MASKS_PATHS = args["masks_folder"]
     TRAIN_CONFIG = args["config_file"]
     OUTPUT_PATHS = args["output_folder"]
-    print("#################################################")
-    print(f'Argument Summary')
-    print(f'Data folder: {DATA_FOLDER}\nImage Folder: {IMG_PATHS}\nMask Folder: {MASKS_PATHS}\nTraining config yml: {TRAIN_CONFIG}')
 
-    print("#################################################")
-    print(f'\ndirectory listing (MASKS_PATHS): \n{os.listdir(MASKS_PATHS)}')
+    TRAIN_IMG_DIR = args["train_img_dir"]
+    TRAIN_COCO_JSON = args["train_coco_json"]
+    VAL_COCO_JSON = args["val_img_dir"]
+    VAL_IMG_DIR = args["val_coco_json"]
+
 
     from detectron2.data.datasets import register_coco_instances
-    TRAIN_PATH = os.path.join(MASKS_PATHS, 'Part_C_train_coco_annotations.json')
-    TEST_PATH = os.path.join(MASKS_PATHS, 'dev_test_val/Part_C_test_testsplit_coco_annotations.json')
-    VAL_PATH = os.path.join(MASKS_PATHS, 'dev_test_val/Part_C_val_testsplit_coco_annotations.json')
-    #VAL_PATH = os.path.join(MASKS_PATHS, 'Part_B_test_coco_annotations.json')
-    #TEST_PATH = os.path.join(MASKS_PATHS, 'Part_B_test_coco_annotations.json')
+    TRAIN_PATH = os.path.join(DATA_FOLDER, TRAIN_COCO_JSON)
+    TRAIN_IMG_PATH= os.path.join(DATA_FOLDER, TRAIN_IMG_DIR)
+    register_coco_instances(f"custom_dataset_train", {},TRAIN_PATH , TRAIN_IMG_PATH)
 
-    register_coco_instances(f"custom_dataset_train", {},TRAIN_PATH , IMG_PATHS)
-    register_coco_instances(f"custom_dataset_test", {}, TEST_PATH, IMG_PATHS)
-    register_coco_instances(f"custom_dataset_val", {}, VAL_PATH, IMG_PATHS)
- 
+    VAL_PATH = os.path.join(DATA_FOLDER, VAL_COCO_JSON)
+    VAL_IMG_PATH= os.path.join(DATA_FOLDER, VAL_IMG_DIR)
+    register_coco_instances(f"custom_dataset_val", {},TRAIN_PATH , VAL_IMG_PATH) 
 
     from detectron2.engine import DefaultTrainer
     from detectron2.config import get_cfg
     from detectron2 import model_zoo
 
     cfg = get_cfg()
-    cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")) # only segmentation and bounding boxes
-
-    # MODEL
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
-    cfg.SEED = 42
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # 1 class (Part_A)
-    cfg.MODEL.RETINANET.NUM_CLASSES = 1
-    cfg.MODEL.BACKBONE.FREEZE_AT = 2
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512 # 128 (default: 512)
-
-    # DATASET
-    cfg.DATASETS.TRAIN = ("custom_dataset_train",)
-    cfg.DATASETS.TEST = ("custom_dataset_test",)   
-    #cfg.DATASETS.TEST = ()   # no metrics implemented for this dataset
-    cfg.TEST.EVAL_PERIOD = 60
-    cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.SOLVER.CHECKPOINT_PERIOD = 250
-    
-
-    # SOLVER
-    cfg.SOLVER.MAX_ITER = 1000 #300
-    cfg.SOLVER.IMS_PER_BATCH = 5 #2
-    cfg.SOLVER.BASE_LR = 0.00025 #0.02 #0.002 0.00025
-    cfg.SOLVER.WARMUP_ITERS = int(0.5 * cfg.SOLVER.MAX_ITER)
-    cfg.SOLVER.WARMUP_FACTOR = 1.0 / (cfg.SOLVER.WARMUP_ITERS + 1)
-    cfg.SOLVER.WEIGHT_DECAY_NORM = 0.0
-
-    
-
+    cfg.merge_from_file(TRAIN_CONFIG) #TRAINING_MODEL_YAML
     cfg.OUTPUT_DIR= OUTPUT_PATHS 
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) #lets just check our output dir exists
+    
+    cfg.freeze()                    # make the configuration unchangeable during the training process
+    with open(cfg.OUTPUT_DIR + "/config.yml", "w") as f:
+        f.write(cfg.dump())
+        
+    
+    from detectron2.evaluation import COCOEvaluator
+    class Trainer2(DefaultTrainer):
+        @classmethod
+        def build_evaluator(cls, cfg, dataset_name, output_folder=None):
+            if output_folder is None:
+                output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
+            return COCOEvaluator(dataset_name, cfg, True, output_folder)
 
-    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-    trainer = DefaultTrainer(cfg)
+
+    trainer = Trainer2(cfg)
     trainer.resume_or_load(resume=False)
     trainer.train()
+
+        
+    #cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    #cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5   # set the testing threshold for this model
+    #cfg.DATASETS.TEST = ("custom_dataset_val", )
+    #predictor = DefaultPredictor(cfg)
+
+    print("#################################################")
+    print("Predicted model path: ", cfg.MODEL.WEIGHTS)
+    print("#################################################")

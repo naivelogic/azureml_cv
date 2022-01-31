@@ -1,37 +1,49 @@
-# The python packages necessary to run ComputerVisionMastery
+# The python packages necessary to run AzureML_CV
 #
 # Install : conda env create -f environment.yml
 # Update  : conda env update -f environment.yml --prune
 # Remove  : conda env remove -n azureml
 
 name: azureml
+channels:
+  - conda-forge
+  - defaults
 dependencies:
   # The python interpreter version.
   # Currently Azure ML only supports 3.5.2 and later.
-- python>=3.7 # the latest python release running on dev machine
-
-- pip:
+  - python==3.7 # the latest python release running on dev machine
+  - pip
+  - pip:
     # Required packages for AzureML execution, history, and data preparation.
-  - azureml-defaults
-  - azureml-core
-  - azureml-sdk    
-  - numpy
-  - requests
-  
-  # MISC for VSCOde
-  - pylint
-  - autopep8
-  - pyyaml  # for detectron2
-  - yacs
+    - azureml-defaults
+    - azureml-core
+    - azureml-sdk    
+    - numpy
+    - requests
+    - azureml-widgets
+    
+    # MISC for VSCOde
+    - pylint
+    - autopep8
+    - pyyaml  # for detectron2
+    - yacs
 
-  # Jupyter Notebook Dependencies
-  - jupyter # great tool for any python project.
-  - nb_conda_kernels
-  - ipykernel
-  - jupyterlab
-  - ipywidgets
-  - tqdm # popular progress bar for jupyter
+    # Jupyter Notebook Dependencies
+    - jupyter # great tool for any python project.
+    - ipykernel
+    - ipywidgets
+    - tqdm # popular progress bar for jupyter
 
+    # other
+    - requests
+    - sklearn
+    - matplotlib
+    - python-dotenv # processing the .env environmental variables
+    - funcy
+    
+    # AML pyhton SDK Notebook additional packages
+    # https://github.com/Azure/MachineLearningNotebooks
+    - azureml-automl-runtime
 
   ### the `nb_conda_kernels` and `ipykernel` packages are installed so that we
   ### can use Jupyter Notebooks with this environment as a kernel
