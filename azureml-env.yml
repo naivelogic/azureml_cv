@@ -21,6 +21,10 @@ dependencies:
     - numpy
     - requests
     - azureml-widgets
+    # AML pyhton SDK Notebook additional packages
+    # https://github.com/Azure/MachineLearningNotebooks
+    #- azureml-automl-runtime
+    #- azure-cli-core
     
     # MISC for VSCOde
     - pylint
@@ -41,9 +45,6 @@ dependencies:
     - python-dotenv # processing the .env environmental variables
     - funcy
     
-    # AML pyhton SDK Notebook additional packages
-    # https://github.com/Azure/MachineLearningNotebooks
-    - azureml-automl-runtime
 
   ### the `nb_conda_kernels` and `ipykernel` packages are installed so that we
   ### can use Jupyter Notebooks with this environment as a kernel

@@ -20,6 +20,7 @@ Azure Machine Learning Service Demo
 * [ ] model evaluaiton
 * [ ] model registration 
 * [ ] model deployment and operationation 
+* [ ] Azure ML Experiment Logging, Metrics and Eval Image Samples
 
 
 ## Quick Start
@@ -67,6 +68,9 @@ Quick start for utilized detectron2 and yolact for AzureML training. Please foll
 
    # now log in 
    az login --use-device-code
+
+   # may also need to install this package if getting authentication errors
+   pip install azure-cli-core
    ```
 
 

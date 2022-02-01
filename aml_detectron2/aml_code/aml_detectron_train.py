@@ -84,7 +84,7 @@ if __name__ == "__main__":
     ap.add_argument('--val_img_dir', type=str, dest='val_img_dir', help='training image data folder mounting point')
     ap.add_argument('--val_coco_json', type=str, dest='val_coco_json', help='training data annotation json file')
 
-    ap.add_argument('--num-gpus', type=int, default=1, dest='num_gpus', help='number of gpus *per machine')
+    ap.add_argument('--num-gpus', type=int, default=4, dest='num_gpus', help='number of gpus *per machine')
     ap.add_argument("--num-machines", type=int, default=1,dest='num_machines', help="total number of machines")
     ap.add_argument("--opts",help="Modify config options using the command-line 'KEY VALUE' pairs",dest='opts',default=[],nargs=argparse.REMAINDER,)
     #ap.add_argument('--resume', type=str, dest='resume', help='TBD Description')
